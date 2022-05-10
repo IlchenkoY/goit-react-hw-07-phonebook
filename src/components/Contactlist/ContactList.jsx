@@ -5,17 +5,24 @@ import { ContactListItem } from '../ContactListItem/ContactListItem';
 import { List, ListItem } from './ContactList.styled';
 
 const ContactList = () => {
-  const { data = [] } = useFetchContactsQuery();
+  const { data = [], error } = useFetchContactsQuery();
   const filter = useSelector(getFilter);
+  let filteredContacts = data.filter(
+    contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase()) ||
+      contact.number.includes(filter),
+  );
+
+  if (error !== undefined) {
+    if (error.status === 404) {
+      filteredContacts = [];
+      return <></>;
+    }
+  }
 
   return (
     <List>
-      {data
-        .filter(
-          contact =>
-            contact.name.toLowerCase().includes(filter.toLowerCase()) ||
-            contact.number.includes(filter),
-        )
+      {filteredContacts
         .sort((a, b) => a.name.localeCompare(b.name))
         .map(({ id, name, number }) => (
           <ListItem key={id}>
